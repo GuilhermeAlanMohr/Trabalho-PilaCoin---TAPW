@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+    <head>
+
+        <meta charset="UTF-8">
+        <title>Home Page</title>
+        <link rel="stylesheet" href="webjars/bootstrap/5.2.3/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="webjars/bootstrap-icons/1.10.3/font/bootstrap-icons.css" />
+        <script src="webjars/bootstrap/5.2.3/js/bootstrap.min.js" defer></script>
+
+    </head>
+
+    <body>
+
+        <a
+            class="btn btn-outline-dark fw-semibold"
+            th:href="@{/pila/minerador/start}">
+            Minerar PilaCoin
+        </a>
+
+        <form th:action="@{/minerador/stop}" method="GET">
+            <input type="submit">Parar mineração de PilaCoin</input>
+        </form>
+        <form th:action="@{/validacao/start}" method="GET">
+            <input type="submit">Validar PilaCioin de outro Usuário</input>
+        </form>
+        <form th:action="@{/validacao/stop}" method="GET">
+            <input type="submit">Parar validação de PilaCoin de outro Usuário</input>
+        </form>
+        <form th:action="@{/descobrir-bloco/start}" method="GET">
+            <input type="submit">Minerar Bloco</input>
+        </form>
+        <form th:action="@{/descobrir-bloco/stop}" method="GET">
+            <input type="submit">Parar mineração de Bloco</input>
+        </form>
+
+    </body>
+
+</html>

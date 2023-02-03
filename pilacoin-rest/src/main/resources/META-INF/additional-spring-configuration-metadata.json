@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "endereco.server",
+      "type": "java.lang.String",
+      "description": "Description for endereco.server."
+  }
+] }
