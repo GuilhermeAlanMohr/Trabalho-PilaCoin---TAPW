@@ -1,6 +1,5 @@
 package br.ufsm.poli.csi.tapw.pilacoin.model;
 
-import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,13 +26,16 @@ public class TratarThread {
 
     class ThreadMineracao implements Runnable{
 
-        @SneakyThrows
         @Override
         public void run() {
             //FAZ MINERAÇÃO
             synchronized (TratarThread.this) {
                 if (parar) {
-                    TratarThread.this.wait();
+                    try {
+                        TratarThread.this.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

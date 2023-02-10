@@ -6,9 +6,10 @@ import br.ufsm.poli.csi.tapw.pilacoin.model.PilaCoinOutroUsuario;
 import br.ufsm.poli.csi.tapw.pilacoin.repository.PilaCoinRepository;
 import br.ufsm.poli.csi.tapw.pilacoin.service.BlocoService;
 import br.ufsm.poli.csi.tapw.pilacoin.service.PilaService;
+import br.ufsm.poli.csi.tapw.pilacoin.service.UsuarioService;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpEntity;
@@ -19,16 +20,13 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
+import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -39,8 +37,7 @@ public class Mineracao {
     //private static String enderecoServer = "192.168.81.101:8080";
     private static String enderecoServer = "srv-ceesp.proj.ufsm.br:8097";
 
-    @SneakyThrows
-    private static void guardaPilaCoinMinerado(PilaCoin pilaCoin){
+    private static void guardaPilaCoinMinerado(PilaCoin pilaCoin) throws IOException {
         File f = new File("src/main/resources/pilaCoinMinerados.txt");
         FileWriter fout = new FileWriter(f, true);
         String pilaCoinString = pilaCoin.toString();
@@ -48,8 +45,7 @@ public class Mineracao {
         fout.close();
     }
 
-    @SneakyThrows
-    private static BigInteger getHash(Object o) {
+    private static BigInteger getHash(Object o) throws NoSuchAlgorithmException, JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         String str = objectMapper.writeValueAsString(o);
@@ -63,11 +59,10 @@ public class Mineracao {
     @EnableTransactionManagement
     @EnableJpaRepositories
     */
-    @SneakyThrows
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
 
-        CadastrarUsuarioProfessor cadastrarUsuarioProfessor = new CadastrarUsuarioProfessor();
-        cadastrarUsuarioProfessor.init();
+        //CadastrarUsuarioProfessor cadastrarUsuarioProfessor = new CadastrarUsuarioProfessor();
+        //cadastrarUsuarioProfessor.init();
         WebSocketClient webSocketClient = new WebSocketClient();
         WebSocketClientBloco webSocketClientBloco = new WebSocketClientBloco();
         webSocketClient.init();
@@ -137,15 +132,13 @@ public class Mineracao {
             System.out.println(resultado);
 
             n = 0L;
-            PilaService pilaService = new PilaService();
-            System.out.println(pilaService.buscaPilaOutroUsuario(DIFICULDADE));
+            System.out.println(PilaService.buscaPilaOutroUsuario(DIFICULDADE));
             BlocoService blocoService = new BlocoService();
             System.out.println(blocoService.buscaBloco(DIFICULDADE));
         }
     }
 
-    @SneakyThrows
-    private static PilaCoin enviaValidacao(PilaCoin pilaCoin) {
+    private static PilaCoin enviaValidacao(PilaCoin pilaCoin) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<PilaCoin> entity = new HttpEntity<>(pilaCoin, headers);
@@ -160,8 +153,7 @@ public class Mineracao {
         }
     }
 
-    @SneakyThrows
-    private static Object enviaValidacaoPilaBloco(PilaCoinOutroUsuario pilaCoin) {
+    private static Object enviaValidacaoPilaBloco(PilaCoinOutroUsuario pilaCoin) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<PilaCoinOutroUsuario> entity = new HttpEntity<>(pilaCoin, headers);
@@ -177,8 +169,7 @@ public class Mineracao {
         }
     }
 
-    @SneakyThrows
-    public static void validaPilaMinerado(PilaCoin pilaCoinValidar, BigInteger DIFICULDADE){
+    public static void validaPilaMinerado(PilaCoin pilaCoinValidar, BigInteger DIFICULDADE) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         BigInteger numHash = getHash(pilaCoinValidar);
         if (numHash.compareTo(DIFICULDADE) < 0) {
             System.out.println("PilaCoin de outro usuário válido");
@@ -199,12 +190,12 @@ public class Mineracao {
 
             PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(barray3));
 
-            PilaCoinOutroUsuario pilaValidado = PilaCoinOutroUsuario.builder()
-                    .chavePublica(publicKey.getEncoded())
-                    .nonce(pilaCoinValidar.getNonce())
-                    .hashPilaBloco(numHash.toByteArray())
-                    //.assinatura(assinatura)
-                    .tipo("PILA").build();
+            PilaCoinOutroUsuario pilaValidado = new PilaCoinOutroUsuario();
+            pilaValidado.setChavePublica(publicKey.getEncoded());
+            pilaValidado.setNonce(pilaCoinValidar.getNonce());
+            pilaValidado.setHashPilaBloco(numHash.toByteArray());
+            //pilaValidado.setAssinatura(assinatura);
+            pilaValidado.setTipo("PILA");
             System.out.println("CHAVE PRIVADA = "+Base64.getEncoder().encodeToString(privateKey.getEncoded()));
             Cipher cipherRSA = Cipher.getInstance("RSA");
             cipherRSA.init(Cipher.ENCRYPT_MODE, privateKey);
@@ -221,8 +212,7 @@ public class Mineracao {
         }
     }
 
-    @SneakyThrows
-    public static void validaBlocoMinerar(Bloco bloco, BigInteger DIFICULDADE){
+    public static void validaBlocoMinerar(Bloco bloco, BigInteger DIFICULDADE) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException{
         BigInteger numHash;
         System.out.println("VALIDANDO BLOCO");
         File f2 = new File("src/main/resources/chavePublica.key");
@@ -240,8 +230,7 @@ public class Mineracao {
         Bloco blocoValidado = enviaValidacaoBlocoMinerado(bloco);
     }
 
-    @SneakyThrows
-    private static Bloco enviaValidacaoBlocoMinerado(Bloco bloco) {
+    private static Bloco enviaValidacaoBlocoMinerado(Bloco bloco) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Bloco> entity = new HttpEntity<>(bloco, headers);

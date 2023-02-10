@@ -2,7 +2,6 @@ package br.ufsm.poli.csi.tapw.pilacoin.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,13 +10,8 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Date;
 
-@Data
-@Builder
-@ToString
 @JsonPropertyOrder(alphabetic = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@AllArgsConstructor
-@NoArgsConstructor
 public class PilaCoinOutroUsuario implements Serializable {
 
     private String nonce; //utilizar precisão de 128 bits
@@ -25,6 +19,16 @@ public class PilaCoinOutroUsuario implements Serializable {
     private byte[] chavePublica;
     private byte[] hashPilaBloco;
     private byte[] assinatura;
+
+    public PilaCoinOutroUsuario(){}
+
+    public PilaCoinOutroUsuario(String nonce, String tipo, byte[] chavePublica, byte[] hashPilaBloco, byte[] assinatura) {
+        this.nonce = nonce;
+        this.tipo = tipo;
+        this.chavePublica = chavePublica;
+        this.hashPilaBloco = hashPilaBloco;
+        this.assinatura = assinatura;
+    }
 
     public byte[] getAssinaturaMaster() {
         return assinatura;

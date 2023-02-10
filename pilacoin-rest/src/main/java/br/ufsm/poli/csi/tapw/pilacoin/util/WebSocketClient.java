@@ -38,14 +38,14 @@ public class WebSocketClient {
         System.out.println("conectou");
     }
 
-    @Scheduled(fixedRate = 3000)
+    @Scheduled(fixedRate = 8000)
     private void printDificuldade() {
         if (sessionHandler.dificuldade != null) {
             System.out.println("Dificuldade Atual: " + sessionHandler.dificuldade);
         }
     }
 
-    @Scheduled(fixedRate = 3000)
+    @Scheduled(fixedRate = 8000)
     private void printPilaCoinOutroUsuario() {
         if (sessionHandler.pilaCoinOutroUsuario != null) {
             System.out.println("PilaCoin de outro usuário para validar: " + sessionHandler.pilaCoinOutroUsuario);

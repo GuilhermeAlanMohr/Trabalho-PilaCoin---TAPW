@@ -1,9 +1,10 @@
 package br.ufsm.poli.csi.tapw.pilacoin.util;
 
-import lombok.Builder;
-import lombok.Data;
+import br.ufsm.poli.csi.tapw.pilacoin.model.Usuario;
+import br.ufsm.poli.csi.tapw.pilacoin.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,10 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.security.*;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.*;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,23 +27,40 @@ public class CadastrarUsuarioProfessor {
     //@Value("${endereco.server}")
     private String enderecoServer = "srv-ceesp.proj.ufsm.br:8097";
     //private String enderecoServer = "192.168.81.101:8080";
+    private final UsuarioService usuarioService;
 
-    @PostConstruct
-    public void init() {
-        System.out.println("Registrado usuário: " + registraUsuario("guilherme"));
+    @Autowired
+    public CadastrarUsuarioProfessor(UsuarioService usuarioService){
+        this.usuarioService = usuarioService;
     }
 
-    @SneakyThrows
-    public UsuarioRest registraUsuario(String nome) {
+    @PostConstruct
+    public void init() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+        System.out.println("Registrado usuário: ");
+        UsuarioRest usuarioRest = registraUsuario("guilherme");
+        Usuario usuario = new Usuario();
+        usuario.setAutoridade("ADMIN");
+        usuario.setNome(usuarioRest.getNome());
+        usuario.setId(usuarioRest.getId());
+        usuario.setSenha(new BCryptPasswordEncoder().encode("1234"));
+        usuario.setEmail("guilherme@gmail.com");
+        usuario.setChavePublica(usuarioRest.getChavePublica());
+        usuario = usuarioService.createUsuario(usuario);
+
+    }
+
+    public UsuarioRest registraUsuario(String nome) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         KeyPair keyPair = leKeyPair();
-        UsuarioRest usuarioRest = UsuarioRest.builder().nome(nome).chavePublica(keyPair.getPublic().getEncoded()).build();
+        UsuarioRest usuarioRest = new UsuarioRest();
+        usuarioRest.setNome(nome);
+        usuarioRest.setChavePublica(keyPair.getPublic().getEncoded());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         //headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity<UsuarioRest> entity = new HttpEntity<>(usuarioRest, headers);
         RestTemplate restTemplate = new RestTemplate();
         try {
-            System.out.println("http://" + enderecoServer + "/usuario/");
+            //System.out.println("http://" + enderecoServer + "/usuario/");
             ResponseEntity<UsuarioRest> resp = restTemplate.postForEntity("http://" + enderecoServer + "/usuario/", entity, UsuarioRest.class);
             return resp.getBody();
         } catch (Exception e) {
@@ -56,8 +71,7 @@ public class CadastrarUsuarioProfessor {
         }
     }
 
-    @SneakyThrows
-    private KeyPair leKeyPair() {
+    private KeyPair leKeyPair() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         File fpub = new File("src/main/resources/chavePublica.key");
         File fpriv = new File("src/main/resources/chavePrivada.key");
         if (fpub.exists() && fpriv.exists()) {
@@ -96,15 +110,44 @@ public class CadastrarUsuarioProfessor {
         }
     }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @ToString
     private static class UsuarioRest {
         private Long id;
         private byte[] chavePublica;
         private String nome;
+
+        public UsuarioRest(){
+
+        }
+
+        public UsuarioRest(Long id, byte[] chavePublica, String nome) {
+            this.id = id;
+            this.chavePublica = chavePublica;
+            this.nome = nome;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public byte[] getChavePublica() {
+            return chavePublica;
+        }
+
+        public void setChavePublica(byte[] chavePublica) {
+            this.chavePublica = chavePublica;
+        }
+
+        public String getNome() {
+            return nome;
+        }
+
+        public void setNome(String nome) {
+            this.nome = nome;
+        }
     }
 
 }

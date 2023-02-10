@@ -17,11 +17,12 @@ public class JwtUtils {
     private static final long LIFETIME = Duration.ofSeconds(10 * 60).toMillis();
     private static final String SIGNATURE = "pilacoin";
 
-    public String generateToken(Usuario usuario) {
+    public static String generateToken(Usuario usuario) {
         final Map<String, Object> claims = new HashMap<>();
 
         claims.put("sub", usuario.getEmail());
         claims.put("name", usuario.getNome());
+        claims.put("roles", usuario.getAutoridade());
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -30,15 +31,15 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String getUsernameToken(String token) {
+    public static String getUsernameToken(String token) {
         return (token != null) ? parseToken(token).getSubject() : null;
     }
 
-    public boolean isExpiredToken(String token) {
+    public static boolean isExpiredToken(String token) {
         return token != null && parseToken(token).getExpiration().before(new Date());
     }
 
-    private Claims parseToken(String token) {
+    private static Claims parseToken(String token) {
         return Jwts.parser()
                 .setSigningKey(SIGNATURE)
                 .parseClaimsJws(token.replace("Bearer ", ""))

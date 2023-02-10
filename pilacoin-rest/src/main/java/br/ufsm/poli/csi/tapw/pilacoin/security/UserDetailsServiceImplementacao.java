@@ -9,6 +9,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
+@Transactional
 @Service
 public class UserDetailsServiceImplementacao implements UserDetailsService {
 
@@ -28,4 +31,5 @@ public class UserDetailsServiceImplementacao implements UserDetailsService {
         }
         return User.withUsername(username).password(usuario.getSenha()).authorities("ADMIN").build();
     }
+
 }

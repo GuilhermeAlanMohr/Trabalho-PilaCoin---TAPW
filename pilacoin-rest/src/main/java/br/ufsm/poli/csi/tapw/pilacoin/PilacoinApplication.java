@@ -1,4 +1,4 @@
-package br.ufsm.poli.csi.tapw.pilacoin.server;
+package br.ufsm.poli.csi.tapw.pilacoin;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,14 +8,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.annotation.PostConstruct;
-import java.util.TimeZone;
-
-//@EnableAsync
-//@EnableScheduling
-//@EnableTransactionManagement
-//@EnableJpaRepositories(basePackages = "br.ufsm.poli.csi.tapw.pilacoin")
-//@EntityScan("br.ufsm.poli.csi.tapw.pilacoin")
+@EnableAsync
+@EnableScheduling
+@EnableTransactionManagement
+@EnableJpaRepositories(basePackages = "br.ufsm.poli.csi.tapw.pilacoin")
+@EntityScan("br.ufsm.poli.csi.tapw.pilacoin")
 @SpringBootApplication
 public class PilacoinApplication {
 
@@ -23,10 +20,11 @@ public class PilacoinApplication {
 		SpringApplication.run(PilacoinApplication.class, args);
 	}
 
+	/*
 	@PostConstruct
 	public void init() {
 		// Setting Spring Boot SetTimeZone
 		TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
 	}
-
+	*/
 }

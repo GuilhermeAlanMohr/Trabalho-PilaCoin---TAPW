@@ -2,12 +2,8 @@ package br.ufsm.poli.csi.tapw.pilacoin.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Temporal;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.PublicKey;
@@ -19,12 +15,14 @@ import java.util.Date;
 public class PilaCoin implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     //private String idCriador;
 
     private Date dataCriacao;
+    @Column(columnDefinition = "TEXT")
     private byte[] chaveCriador;
+    @Column(columnDefinition = "TEXT")
     private byte[] assinaturaMaster;
     private String nonce; //utilizar precisão de 128 bits
     private String status;

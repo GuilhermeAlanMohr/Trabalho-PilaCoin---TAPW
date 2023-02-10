@@ -33,7 +33,7 @@ public class WebSocketClientBloco {
         stompClient.connect("ws://" + enderecoServer + "/websocket/websocket", sessionHandler);
     }
 
-    @Scheduled(fixedRate = 3000)
+    @Scheduled(fixedRate = 8000)
     private void printBloco() {
         if (sessionHandler.bloco != null) {
             System.out.println("Bloco Atual: " + sessionHandler.bloco);
@@ -42,11 +42,11 @@ public class WebSocketClientBloco {
 
 
     public Bloco getBloco() {
-        System.out.println("Chamou");
+        //System.out.println("Chamou");
         while (sessionHandler.getBloco() == null) {
             Thread.onSpinWait();
         }
-        System.out.println("BLOCO RECEBIDO");
+        //System.out.println("BLOCO RECEBIDO");
         return sessionHandler.getBloco();
     }
 
@@ -79,7 +79,7 @@ public class WebSocketClientBloco {
 
         @Override
         public void handleFrame(StompHeaders stompHeaders, Object o) {
-            System.out.println("Received : " + o);
+            //System.out.println("Received : " + o);
             assert o != null;
             bloco = (Bloco) o;
 

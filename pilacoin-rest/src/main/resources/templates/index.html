@@ -8,32 +8,46 @@
         <link rel="stylesheet" href="webjars/bootstrap/5.2.3/css/bootstrap.min.css" />
         <link rel="stylesheet" href="webjars/bootstrap-icons/1.10.3/font/bootstrap-icons.css" />
         <script src="webjars/bootstrap/5.2.3/js/bootstrap.min.js" defer></script>
+        <script src="webjars/sockjs-client/1.5.1/sockjs.min.js" defer></script>
+        <script src="webjars/stomp-websocket/2.3.4/stomp.min.js" defer></script>
 
     </head>
 
     <body>
 
-        <a
-            class="btn btn-outline-dark fw-semibold"
-            th:href="@{/pila/minerador/start}">
-            Minerar PilaCoin
-        </a>
+        <div class="container">
+            <a th:href="@{/logout}">Logout</a>
+            <a th:href="@{/minerador/start}">Minerar PilaCoin</a>
+            <a th:href="@{/minerador/stop}">Parar mineração de PilaCoin</a>
+            <a th:href="@{/validacao/start}">Validar PilaCioin de outro Usuário</a>
+            <a th:href="@{/validacao/stop}">Parar validação de PilaCoin de outro Usuário</a>
+            <a th:href="@{/descobrir-bloco/start}">Minerar Bloco</a>
+            <a th:href="@{/descobrir-bloco/stop}">Parar mineração de Bloco</a>
+        </div>
 
-        <form th:action="@{/minerador/stop}" method="GET">
-            <input type="submit">Parar mineração de PilaCoin</input>
-        </form>
-        <form th:action="@{/validacao/start}" method="GET">
-            <input type="submit">Validar PilaCioin de outro Usuário</input>
-        </form>
-        <form th:action="@{/validacao/stop}" method="GET">
-            <input type="submit">Parar validação de PilaCoin de outro Usuário</input>
-        </form>
-        <form th:action="@{/descobrir-bloco/start}" method="GET">
-            <input type="submit">Minerar Bloco</input>
-        </form>
-        <form th:action="@{/descobrir-bloco/stop}" method="GET">
-            <input type="submit">Parar mineração de Bloco</input>
-        </form>
+        <table border="1px">
+
+            <thead>
+
+                <tr>
+
+                    <th>Nonce</th>
+                    <th>Data de criação</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr th:each="pila : ${pilas}">
+                    <td th:text="${pila.nonce}"></td>
+                    <td th:text="${pila.dataCriacao}"></td>
+                </tr>
+
+            </tbody>
+
+        </table>
 
     </body>
 

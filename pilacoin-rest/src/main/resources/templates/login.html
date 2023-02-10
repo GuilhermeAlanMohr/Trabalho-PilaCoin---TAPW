@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+
+  <head>
+
+    <meta charset="UTF-8">
+    <title>PilaCoin Sistema de Acesso</title>
+    <link rel="stylesheet" href="webjars/bootstrap/5.2.3/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="webjars/bootstrap-icons/1.10.3/font/bootstrap-icons.css" />
+    <script src="webjars/bootstrap/5.2.3/js/bootstrap.min.js" defer></script>
+    <script src="webjars/sockjs-client/1.5.1/sockjs.min.js" defer></script>
+    <script src="webjars/stomp-websocket/2.3.4/stomp.min.js" defer></script>
+
+  </head>
+
+  <body>
+
+    <form th:action="@{/efetualogin}" method="post">
+
+      <label for="email">
+        Email:
+        <input type="email" name="email" id="email" />
+      </label>
+
+      <label for="senha">
+        Senha:
+        <input type="password" name="senha" id="senha" />
+      </label>
+
+      <button type="submit">Acessar</button>
+
+    </form>
+
+  </body>
+
+</html>

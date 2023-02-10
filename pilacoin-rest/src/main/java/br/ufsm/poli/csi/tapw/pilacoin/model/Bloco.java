@@ -4,13 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @JsonPropertyOrder(alphabetic = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Bloco {
+public class Bloco implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -19,19 +20,23 @@ public class Bloco {
     private byte[] chaveUsuarioMinerador;
     private String nonce;
     private String nonceBlocoAnterior;
-    @OneToMany(mappedBy = "bloco")
+    /*@SuppressWarnings("JpaAttributeTypeInspection")
+    @OneToMany(mappedBy = "transacao")
     private List<Transacao> transacoes;
+    */
+    public Bloco() {
+
+    }
 
     public Bloco(Long numeroBloco) {
         this.numeroBloco = numeroBloco;
     }
 
-    public Bloco(Long numeroBloco, byte[] chaveUsuarioMinerador, String nonce, String nonceBlocoAnterior, List<Transacao> transacoes) {
+    public Bloco(Long numeroBloco, byte[] chaveUsuarioMinerador, String nonce, String nonceBlocoAnterior) {
         this.numeroBloco = numeroBloco;
         this.chaveUsuarioMinerador = chaveUsuarioMinerador;
         this.nonce = nonce;
         this.nonceBlocoAnterior = nonceBlocoAnterior;
-        this.transacoes = transacoes;
     }
 
     public Long getNumeroBloco() {
@@ -65,7 +70,7 @@ public class Bloco {
     public void setNonceBlocoAnterior(String nonceBlocoAnterior) {
         this.nonceBlocoAnterior = nonceBlocoAnterior;
     }
-
+    /*
     public List<Transacao> getTransacoes() {
         return transacoes;
     }
@@ -73,5 +78,5 @@ public class Bloco {
     public void setTransacoes(List<Transacao> transacoes) {
         this.transacoes = transacoes;
     }
-
+    */
 }

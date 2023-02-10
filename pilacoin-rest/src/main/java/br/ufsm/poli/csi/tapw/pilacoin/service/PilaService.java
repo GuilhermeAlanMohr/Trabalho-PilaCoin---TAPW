@@ -2,11 +2,18 @@ package br.ufsm.poli.csi.tapw.pilacoin.service;
 
 import br.ufsm.poli.csi.tapw.pilacoin.model.PilaCoin;
 import br.ufsm.poli.csi.tapw.pilacoin.model.PilaCoinOutroUsuario;
+import br.ufsm.poli.csi.tapw.pilacoin.repository.PilaCoinRepository;
 import br.ufsm.poli.csi.tapw.pilacoin.util.WebSocketClient;
 import br.ufsm.poli.csi.tapw.pilacoin.util.WebSocketClientBloco;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,32 +25,54 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import javax.annotation.PostConstruct;
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PilaService {
 
+    private final PilaCoinRepository repository;
     private static String enderecoServer = "srv-ceesp.proj.ufsm.br:8097";
 
-    @PostConstruct
-    void init() {
+    public PilaService(PilaCoinRepository pilaCoinRepository){
+        this.repository = pilaCoinRepository;
+    }
 
+    public List<PilaCoin> getAllPilas() {
+        List<PilaCoin> pilaList = repository.findAll();
+
+        if(pilaList.size() > 0) {
+            return pilaList;
+        } else {
+            return new ArrayList<PilaCoin>();
+        }
+    }
+
+    @Transactional
+    public PilaCoin createPila(PilaCoin pila) throws RuntimeException {
+        PilaCoin newPilaCoin = repository.save(pila);
+        return newPilaCoin;
 
     }
 
-    @SneakyThrows
-    public String buscaPilaOutroUsuario (BigInteger dificuldade) {
+    public static String buscaPilaOutroUsuario(BigInteger dificuldade) throws NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, InvalidKeySpecException, BadPaddingException, InvalidKeyException {
         WebSocketClient webSocketClient = new WebSocketClient();
         PilaCoin pilaCoinValidar = webSocketClient.getPilaCoinOutroUsuario();
         if ( pilaCoinValidar != null ) {
@@ -53,11 +82,9 @@ public class PilaService {
         }
     }
 
-    @SneakyThrows
-    public static String validaPilaMinerado(PilaCoin pilaCoinValidar, BigInteger DIFICULDADE){
+    public static String validaPilaMinerado(PilaCoin pilaCoinValidar, BigInteger DIFICULDADE) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
         BigInteger numHash = getHash(pilaCoinValidar);
         if (numHash.compareTo(DIFICULDADE) < 0) {
-            System.out.println("PilaCoin de outro usuário válido");
 
             File f2 = new File("src/main/resources/chavePublica.key");
             FileInputStream fin2 = new FileInputStream(f2);
@@ -75,12 +102,12 @@ public class PilaService {
 
             PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(barray3));
 
-            PilaCoinOutroUsuario pilaValidado = PilaCoinOutroUsuario.builder()
-                    .chavePublica(publicKey.getEncoded())
-                    .nonce(pilaCoinValidar.getNonce())
-                    .hashPilaBloco(numHash.toByteArray())
-                    //.assinatura(assinatura)
-                    .tipo("PILA").build();
+            PilaCoinOutroUsuario pilaValidado = new PilaCoinOutroUsuario();
+            pilaValidado.setChavePublica(publicKey.getEncoded());
+            pilaValidado.setNonce(pilaCoinValidar.getNonce());
+            pilaValidado.setHashPilaBloco(numHash.toByteArray());
+            //pilaValidado.setAssinatura(assinatura);
+            pilaValidado.setTipo("PILA");
             System.out.println("CHAVE PRIVADA = "+ Base64.getEncoder().encodeToString(privateKey.getEncoded()));
             Cipher cipherRSA = Cipher.getInstance("RSA");
             cipherRSA.init(Cipher.ENCRYPT_MODE, privateKey);
@@ -97,7 +124,6 @@ public class PilaService {
         }
     }
 
-    @SneakyThrows
     public static String enviaValidacaoPilaBloco(PilaCoinOutroUsuario pilaCoin) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -114,8 +140,7 @@ public class PilaService {
         }
     }
 
-    @SneakyThrows
-    private static BigInteger getHash(Object o) {
+    private static BigInteger getHash(Object o) throws JsonProcessingException, NoSuchAlgorithmException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         String str = objectMapper.writeValueAsString(o);
@@ -124,7 +149,6 @@ public class PilaService {
         return new BigInteger(hash).abs();
     }
 
-    @SneakyThrows
     public static PilaCoin enviaValidacao(PilaCoin pilaCoin) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

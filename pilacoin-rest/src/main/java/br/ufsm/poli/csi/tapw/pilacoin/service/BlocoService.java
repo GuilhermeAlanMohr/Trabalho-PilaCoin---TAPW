@@ -25,7 +25,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.X509EncodedKeySpec;
 
-@Service
+//@Service
 public class BlocoService {
 
     private static String enderecoServer = "srv-ceesp.proj.ufsm.br:8097";

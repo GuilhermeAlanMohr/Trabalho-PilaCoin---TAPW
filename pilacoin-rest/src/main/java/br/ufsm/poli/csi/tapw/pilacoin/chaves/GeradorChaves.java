@@ -1,19 +1,17 @@
 package br.ufsm.poli.csi.tapw.pilacoin.chaves;
 
-import lombok.SneakyThrows;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 public class GeradorChaves {
 
-    @SneakyThrows
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
